@@ -1,0 +1,7 @@
+"use client";
+import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+type Project={id:string;name:string;description:string;updated:string;art:string;members:number};
+type State={activePage:string;projects:Project[];search:string};
+const initialState:State={activePage:"Overview",search:"",projects:[{id:"p1",name:"Studio refresh",description:"Brand system · Design team",updated:"2 min ago",art:"art-one",members:4},{id:"p2",name:"Mobile experience",description:"Product design · Sprint 08",updated:"18 min ago",art:"art-two",members:3},{id:"p3",name:"Campaign concepts",description:"Marketing · Q2 launch",updated:"Yesterday",art:"art-three",members:5},{id:"p4",name:"Dashboard explorations",description:"SaaS · Product team",updated:"2 days ago",art:"art-four",members:2}]};
+const slice=createSlice({name:"app",initialState,reducers:{setPage(s,a:PayloadAction<string>){s.activePage=a.payload},setSearch(s,a:PayloadAction<string>){s.search=a.payload},addProject(s,a:PayloadAction<string>){const name=a.payload.trim();if(name)s.projects.unshift({id:Date.now().toString(),name,description:"New canvas · Just created",updated:"Just now",art:"art-one",members:1})}}});
+export const {setPage,setSearch,addProject}=slice.actions;export const store=configureStore({reducer:{app:slice.reducer}});export type RootState=ReturnType<typeof store.getState>;export type AppDispatch=typeof store.dispatch;
