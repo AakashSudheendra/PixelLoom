@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST() {
   const token = process.env.POLAR_ACCESS_TOKEN;
   const productId = process.env.POLAR_PRODUCT_ID;
+
   if (!token || !productId) {
     return NextResponse.json(
       { error: "Billing is not configured. Set POLAR_ACCESS_TOKEN and POLAR_PRODUCT_ID on the server." },
@@ -30,10 +31,26 @@ export async function POST() {
       }),
       cache: "no-store",
     });
-    const payload = await response.json();
+
     if (!response.ok) {
-      return NextResponse.json({ error: "Polar checkout could not be created.", details: payload }, { status: response.status });
+      // Do not return provider response bodies to clients: they may contain
+      // operational details that should remain server-side.
+      return NextResponse.json(
+        { error: "Polar checkout could not be created. Check the server logs and billing configuration." },
+        { status: response.status >= 500 ? 502 : 400 }
+      );
     }
+
+    const payload: unknown = await response.json();
+    if (
+      typeof payload !== "object" ||
+      payload === null ||
+      !("url" in payload) ||
+      typeof payload.url !== "string"
+    ) {
+      return NextResponse.json({ error: "Polar returned an invalid checkout response." }, { status: 502 });
+    }
+
     return NextResponse.json({ url: payload.url });
   } catch {
     return NextResponse.json({ error: "Unable to reach Polar billing service." }, { status: 502 });
