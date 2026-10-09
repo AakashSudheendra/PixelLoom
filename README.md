@@ -79,6 +79,7 @@ Set only the variables for services you intend to configure:
 | `CONVEX_DEPLOYMENT` | Convex CLI | Usually populated by `npx convex dev` |
 | `INNGEST_EVENT_KEY` | Inngest Cloud | Event publishing from the app |
 | `INNGEST_SIGNING_KEY` | Inngest Cloud | Verifies signed Inngest requests |
+| `PIXELLOOM_AUTOSAVE_API_KEY` | Autosave event endpoint | Server-only bearer token required by `POST /api/canvas/autosave`; generate a long random value and never expose it in browser code |
 | `POLAR_ACCESS_TOKEN` | Billing | Server-only Polar API token; never expose with a `NEXT_PUBLIC_` prefix |
 | `POLAR_PRODUCT_ID` | Billing | Product identifier configured in Polar |
 | `POLAR_SERVER` | Billing | Use `sandbox` during development or `production` when configured for live payments |
@@ -110,7 +111,7 @@ Set `NEXT_PUBLIC_CONVEX_URL` from the deployment settings. Convex functions live
 
 ### 5. Configure Inngest (optional)
 
-The handler is exposed at `/api/inngest`. For local development, run the Inngest Dev Server and point it at your app, or configure the app in Inngest Cloud. Ensure event keys and signing keys match the environment. Current handlers provide workflow scaffolding and do not yet persist a versioned canvas snapshot or deliver invitations through an email provider.
+The handler is exposed at `/api/inngest`. A server-to-server `POST /api/canvas/autosave` endpoint validates the payload and queues an Inngest event; requests require `Authorization: Bearer <PIXELLOOM_AUTOSAVE_API_KEY>`. This endpoint is not yet connected to the visible editor. For local development, run the Inngest Dev Server and point it at your app, or configure the app in Inngest Cloud. Ensure event keys and signing keys match the environment. Current handlers provide workflow scaffolding and do not yet persist a versioned canvas snapshot or deliver invitations through an email provider.
 
 ### 6. Configure Polar (optional)
 
