@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { inngest } from "@/lib/inngest";
 
@@ -6,9 +7,23 @@ type AutosaveRequest = {
   objectCount?: unknown;
 };
 
-export async function POST(request: Request) {
-  let body: AutosaveRequest;
+function hasValidToken(request: Request, expected: string) {
+  const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+  const expectedBuffer = Buffer.from(expected);
+  const suppliedBuffer = Buffer.from(supplied);
+  return suppliedBuffer.length === expectedBuffer.length && timingSafeEqual(suppliedBuffer, expectedBuffer);
+}
 
+export async function POST(request: Request) {
+  const token = process.env.PIXELLOOM_AUTOSAVE_API_KEY;
+  if (!token) {
+    return NextResponse.json({ error: "Autosave event endpoint is not configured." }, { status: 503 });
+  }
+  if (!hasValidToken(request, token)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  let body: AutosaveRequest;
   try {
     body = (await request.json()) as AutosaveRequest;
   } catch {
@@ -29,7 +44,6 @@ export async function POST(request: Request) {
       name: "canvas/autosave.requested",
       data: { canvasId: body.canvasId.trim(), objectCount },
     });
-
     return NextResponse.json({ accepted: true, ids: result.ids }, { status: 202 });
   } catch {
     return NextResponse.json({ error: "Unable to queue autosave workflow." }, { status: 502 });
