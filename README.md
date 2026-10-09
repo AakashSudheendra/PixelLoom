@@ -35,6 +35,7 @@ PixelLoom is a Next.js App Router application built around an infinite-canvas wo
 
 ### Background jobs and billing foundation
 - Inngest route at `/api/inngest`.
+- Validated autosave-event endpoint at `POST /api/canvas/autosave` (queues an Inngest event; it does not yet persist a versioned snapshot).
 - Autosave-checkpoint and workspace-invitation event handlers.
 - Polar checkout session endpoint at `POST /api/billing/checkout`.
 - Example environment-variable file for local setup.
@@ -139,6 +140,7 @@ Run `npm run typecheck` and `npm run build` before opening a pull request or dep
 ├── src/
 │   ├── app/
 │   │   ├── api/billing/checkout/route.ts
+│   │   ├── api/canvas/autosave/route.ts
 │   │   ├── api/inngest/route.ts
 │   │   ├── globals.css
 │   │   ├── layout.tsx
