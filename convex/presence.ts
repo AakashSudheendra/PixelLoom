@@ -1,0 +1,4 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+export const list=query({args:{canvasId:v.id("canvases")},handler:async(ctx,args)=>(await ctx.db.query("canvasPresence").withIndex("by_canvas",q=>q.eq("canvasId",args.canvasId)).collect()).filter(p=>p.lastSeen>Date.now()-45000)});
+export const heartbeat=mutation({args:{canvasId:v.id("canvases"),userId:v.string(),displayName:v.string(),cursorX:v.number(),cursorY:v.number()},handler:async(ctx,args)=>{const old=await ctx.db.query("canvasPresence").withIndex("by_canvas",q=>q.eq("canvasId",args.canvasId)).filter(q=>q.eq(q.field("userId"),args.userId)).first();const row={...args,lastSeen:Date.now()};if(old)await ctx.db.patch(old._id,row);else await ctx.db.insert("canvasPresence",row);}});
