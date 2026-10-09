@@ -1,0 +1,5 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+export const list=query({args:{canvasId:v.id("canvases")},handler:(ctx,args)=>ctx.db.query("canvasObjects").withIndex("by_canvas",q=>q.eq("canvasId",args.canvasId)).collect()});
+export const upsert=mutation({args:{id:v.optional(v.id("canvasObjects")),canvasId:v.id("canvases"),kind:v.union(v.literal("note"),v.literal("text"),v.literal("shape")),x:v.number(),y:v.number(),width:v.number(),height:v.number(),content:v.string(),color:v.string(),userId:v.string()},handler:async(ctx,args)=>{const {id,...data}=args;const row={...data,updatedAt:Date.now(),updatedBy:args.userId};if(id){await ctx.db.patch(id,row);return id;}return ctx.db.insert("canvasObjects",row);}});
+export const remove=mutation({args:{id:v.id("canvasObjects")},handler:(ctx,args)=>ctx.db.delete(args.id)});
